@@ -12,49 +12,101 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
+      font-family: 'Arial', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #74ebd5, #ACB6E5);
+      animation: gradient 10s ease infinite;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
 
-    h1, h2 {
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 10px;
+      padding: 20px;
+      width: 400px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      text-align: center;
       color: #333;
+      font-size: 2.5em;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      font-size: 1.5em;
     }
 
     input {
       display: block;
-      margin: 10px 0;
+      margin: 10px auto;
       padding: 10px;
-      width: 300px;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     button {
+      display: block;
+      margin: 10px auto;
       padding: 10px;
       background-color: #5c67f2;
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1em;
+      width: 90%;
     }
 
     button:hover {
       background-color: #4e54d4;
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
 
-  <h1>Instant</h1>
-  <h2>Registration</h2>
-  <input type="email" id="reg-email" placeholder="Email" required>
-  <input type="password" id="reg-password" placeholder="Password" required>
-  <input type="text" id="reg-username" placeholder="Username" required>
-  <button id="register-btn">Register</button>
+  <div class="container">
+    <h1>Instant</h1>
+    <h2>Registration</h2>
+    <input type="email" id="reg-email" placeholder="Email" required>
+    <input type="password" id="reg-password" placeholder="Password" required>
+    <input type="text" id="reg-username" placeholder="Username" required>
+    <button id="register-btn">Register</button>
 
-  <h2>Login</h2>
-  <input type="email" id="login-email" placeholder="Email" required>
-  <input type="password" id="login-password" placeholder="Password" required>
-  <button id="login-btn">Login</button>
+    <h2>Login</h2>
+    <input type="email" id="login-email" placeholder="Email" required>
+    <input type="password" id="login-password" placeholder="Password" required>
+    <button id="login-btn">Login</button>
+  </div>
 
   <script>
     // Firebase Configuration
