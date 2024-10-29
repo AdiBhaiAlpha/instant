@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instant - Admin Dashboard</title>
+  <title>Instant - Login/Register</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
@@ -18,8 +18,15 @@
       padding: 20px;
     }
 
-    h1 {
+    h1, h2 {
       color: #333;
+    }
+
+    input {
+      display: block;
+      margin: 10px 0;
+      padding: 10px;
+      width: 300px;
     }
 
     button {
@@ -37,21 +44,72 @@
 </head>
 <body>
 
-  <h1>Admin Dashboard</h1>
-  <button id="logout-btn">Logout</button>
-  <div id="user-list">
-    <!-- List of users will be dynamically loaded here -->
-  </div>
+  <h1>Instant</h1>
+  <h2>Registration</h2>
+  <input type="email" id="reg-email" placeholder="Email" required>
+  <input type="password" id="reg-password" placeholder="Password" required>
+  <input type="text" id="reg-username" placeholder="Username" required>
+  <button id="register-btn">Register</button>
+
+  <h2>Login</h2>
+  <input type="email" id="login-email" placeholder="Email" required>
+  <input type="password" id="login-password" placeholder="Password" required>
+  <button id="login-btn">Login</button>
 
   <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCLXvvMOFLkIBhaJy2B1BVsKB_4D6zQOUQ",
+      authDomain: "instagram-dd382.firebaseapp.com",
+      projectId: "instagram-dd382",
+      storageBucket: "instagram-dd382.appspot.com",
+      messagingSenderId: "1061753373772",
+      appId: "1:1061753373772:web:aa64166aab56f74cafa0e9",
+      measurementId: "G-9XD25YYKC5"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
     const auth = getAuth();
     const db = getFirestore();
 
-    // Load users from Firestore
-    async function loadUsers() {
-      const userList = document.getElementById('user-list');
-      userList.innerHTML = ''; // Clear existing users
+    // Registration
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const username = document.getElementById('reg-username').value;
 
-      const querySnapshot = await getDocs(collection(db, "users"));
-      querySnapshot.forEach((doc) => {
-        const
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Save user details to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          username: username
+        });
+
+        alert("Registration successful!");
+        window.location.href = 'dashboard.html'; // Redirect to user dashboard
+      } catch (error) {
+        console.error("Registration failed:", error);
+      }
+    });
+
+    // Login
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
+        window.location.href = 'dashboard.html'; // Redirect to user dashboard
+      } catch (error) {
+        console.error("Login failed:", error);
+      }
+    });
+  </script>
+
+</body>
+</html>
