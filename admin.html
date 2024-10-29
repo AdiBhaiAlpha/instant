@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant - Admin Dashboard</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Admin Dashboard</h1>
+  <button id="logout-btn">Logout</button>
+  <div id="user-list">
+    <!-- List of users will be dynamically loaded here -->
+  </div>
+
+  <script>
+    const auth = getAuth();
+    const db = getFirestore();
+
+    // Load users from Firestore
+    async function loadUsers() {
+      const userList = document.getElementById('user-list');
+      userList.innerHTML = ''; // Clear existing users
+
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const userElement = document.createElement('div');
+        userElement.innerHTML = `
+          <h3>${userData.username} (${userData.email})</h3>
+          <button onclick="banUser('${doc.id}')">Ban User</button>
+        `;
+        userList.appendChild(userElement);
+      });
+    }
+
+    // Ban user function
+    async function banUser(userId) {
+      // Logic to ban user (store in Firestore or update user status)
+      alert("User banned! (Implement your own logic)");
+    }
+
+    // Logout function
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await auth.signOut();
+      window.location.href = 'index.html'; // Redirect to login
+    });
+
+    // Load users on page load
+    onAuthStateChanged(auth, (user) => {
+      if (user && user.email === "adi@dev.co") {
+        loadUsers(); // Load users if admin is logged in
+      } else {
+        window.location.href = 'index.html'; // Redirect to login if not logged in or not admin
+      }
+    });
+  </script>
+
+</body>
+</html>
