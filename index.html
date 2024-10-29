@@ -101,7 +101,7 @@
     <script>
         // Import Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
 
         // Your Firebase configuration
@@ -139,6 +139,9 @@
 
                 alert("Registration successful!");
                 // Redirect to user dashboard or home page here
+                // For example:
+                window.location.href = "user_dashboard.html"; // Update with your actual user dashboard URL
+
             } catch (error) {
                 console.error("Error during registration:", error);
                 alert(error.message);
@@ -155,6 +158,9 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 alert("Login successful!");
                 // Redirect to user dashboard or home page here
+                // For example:
+                window.location.href = "user_dashboard.html"; // Update with your actual user dashboard URL
+
             } catch (error) {
                 console.error("Error during login:", error);
                 alert(error.message);
