@@ -3,108 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Instagram Clone</title>
+  <title>Instant - Login/Register</title>
   
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
   
-  <style>
-    /* CSS Styles */
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
-    }
-
-    header {
-      background-color: white;
-      border-bottom: 1px solid #dbdbdb;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .header-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-    }
-
-    input[type="search"] {
-      width: 300px;
-      padding: 5px 10px;
-      border-radius: 5px;
-      border: 1px solid #dbdbdb;
-    }
-
-    .post-card {
-      max-width: 600px;
-      margin: 20px auto;
-      background-color: white;
-      border: 1px solid #dbdbdb;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .post-header {
-      display: flex;
-      align-items: center;
-      padding: 10px;
-    }
-
-    .avatar {
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      margin-right: 10px;
-    }
-
-    img.post-image {
-      width: 100%;
-      height: auto;
-    }
-
-    .post-footer {
-      padding: 10px;
-    }
-
-    button {
-      background-color: #0095f6;
-      border: none;
-      color: white;
-      padding: 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header>
-    <div class="header-container">
-      <h1>Instagram Clone</h1>
-      <input type="search" placeholder="Search">
-      <button id="login-btn">Login with Google</button>
-    </div>
-  </header>
+  <h1>Instant</h1>
+  <h2>Registration</h2>
+  <input type="email" id="reg-email" placeholder="Email" required>
+  <input type="password" id="reg-password" placeholder="Password" required>
+  <input type="text" id="reg-username" placeholder="Username" required>
+  <button id="register-btn">Register</button>
 
-  <main id="post-container">
-    <!-- Posts will be dynamically loaded here -->
-  </main>
+  <h2>Login</h2>
+  <input type="email" id="login-email" placeholder="Email" required>
+  <input type="password" id="login-password" placeholder="Password" required>
+  <button id="login-btn">Login</button>
 
   <script>
-    // Import the necessary Firebase functions
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js";
-
-    // Your Firebase configuration
+    // Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyCLXvvMOFLkIBhaJy2B1BVsKB_4D6zQOUQ",
       authDomain: "instagram-dd382.firebaseapp.com",
@@ -117,55 +40,43 @@
 
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth();
     const db = getFirestore();
 
-    // Google login setup
-    const loginBtn = document.getElementById('login-btn');
-    loginBtn.addEventListener('click', async () => {
-      const provider = new GoogleAuthProvider();
+    // Registration
+    document.getElementById('register-btn').addEventListener('click', async () => {
+      const email = document.getElementById('reg-email').value;
+      const password = document.getElementById('reg-password').value;
+      const username = document.getElementById('reg-username').value;
+
       try {
-        const result = await signInWithPopup(auth, provider);
-        const user = result.user;
-        alert(`Logged in as ${user.displayName}`);
-        loadPosts(); // Load posts after login
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Save user details to Firestore
+        await setDoc(doc(db, "users", user.uid), {
+          email: email,
+          username: username
+        });
+
+        alert("Registration successful!");
+        window.location.href = 'dashboard.html'; // Redirect to user dashboard
       } catch (error) {
-        console.error("Login failed:", error);
+        console.error("Registration failed:", error);
       }
     });
 
-    // Load posts from Firestore
-    async function loadPosts() {
-      const postContainer = document.getElementById('post-container');
-      postContainer.innerHTML = ''; // Clear existing posts
+    // Login
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
 
-      const querySnapshot = await getDocs(collection(db, "posts"));
-      querySnapshot.forEach((doc) => {
-        const postData = doc.data();
-        const postElement = document.createElement('div');
-        postElement.classList.add('post-card');
-        postElement.innerHTML = `
-          <div class="post-header">
-            <img src="${postData.userAvatar}" class="avatar" alt="User Avatar">
-            <span>${postData.username}</span>
-          </div>
-          <img src="${postData.imageUrl}" class="post-image" alt="Post Image">
-          <div class="post-footer">
-            <p>${postData.caption}</p>
-          </div>
-        `;
-        postContainer.appendChild(postElement);
-      });
-    }
-
-    // Monitor authentication state changes
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginBtn.style.display = 'none'; // Hide login button if user is logged in
-        loadPosts(); // Load posts if user is logged in
-      } else {
-        loginBtn.style.display = 'block'; // Show login button if user is not logged in
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        alert("Login successful!");
+        window.location.href = 'dashboard.html'; // Redirect to user dashboard
+      } catch (error) {
+        console.error("Login failed:", error);
       }
     });
   </script>
