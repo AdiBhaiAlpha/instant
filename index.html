@@ -3,18 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Website Title</title>
-    <link rel="stylesheet" href="styles.css"> <!-- আপনার CSS ফাইল -->
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <title>Instant</title>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #ff6f61;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background-color: #ff3d31;
+            transform: translateY(-3px);
+        }
+
+        .toggle-form {
+            cursor: pointer;
+            margin-top: 20px;
+            color: #ff6f61;
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <!-- আপনার HTML কোড -->
+
+    <div class="container">
+        <h1>Instant</h1>
+        <form id="registration-form">
+            <input type="text" id="username" placeholder="Username" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+
+        <form id="login-form" style="display:none;">
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="toggle-form" id="toggle-form">Switch to <span id="form-toggle-text">Login</span></div>
+    </div>
 
     <script>
-        // Firebase Configuration
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+        // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCLXvvMOFLkIBhaJy2B1BVsKB_4D6zQOUQ",
             authDomain: "instagram-dd382.firebaseapp.com",
@@ -27,47 +117,64 @@
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        const auth = getAuth();
+        const db = getFirestore();
 
-        // Registration
-        document.getElementById('register-btn').addEventListener('click', async () => {
-            console.log("Register button clicked");
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const username = document.getElementById('reg-username').value;
+        // Registration form handling
+        document.getElementById('registration-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Save user details to Firestore
+                // Save user data to Firestore
                 await setDoc(doc(db, "users", user.uid), {
-                    email: email,
-                    username: username
+                    username: username,
+                    email: email
                 });
 
                 alert("Registration successful!");
-                window.location.href = 'dashboard.html'; // Redirect to user dashboard
+                // Redirect to user dashboard or home page here
             } catch (error) {
-                console.error("Registration failed:", error.message);
-                alert(error.message); // Show error to the user
+                console.error("Error during registration:", error);
+                alert(error.message);
             }
         });
 
-        // Login
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            console.log("Login button clicked");
+        // Login form handling
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, email, password);
                 alert("Login successful!");
-                window.location.href = 'dashboard.html'; // Redirect to user dashboard
+                // Redirect to user dashboard or home page here
             } catch (error) {
-                console.error("Login failed:", error.message);
-                alert(error.message); // Show error to the user
+                console.error("Error during login:", error);
+                alert(error.message);
+            }
+        });
+
+        // Toggle between login and registration forms
+        document.getElementById('toggle-form').addEventListener('click', () => {
+            const registrationForm = document.getElementById('registration-form');
+            const loginForm = document.getElementById('login-form');
+            const formToggleText = document.getElementById('form-toggle-text');
+
+            if (registrationForm.style.display === "none") {
+                registrationForm.style.display = "block";
+                loginForm.style.display = "none";
+                formToggleText.innerText = "Login";
+            } else {
+                registrationForm.style.display = "none";
+                loginForm.style.display = "block";
+                formToggleText.innerText = "Register";
             }
         });
     </script>
