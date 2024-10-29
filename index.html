@@ -4,77 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Instant</title>
-
+    
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js" type="module"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js" type="module"></script>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-analytics.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         /* CSS Styles */
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #ffafbd, #ffc3a0);
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #333;
+            flex-direction: column;
         }
 
         .container {
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
-            max-width: 400px;
-            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            width: 400px;
             text-align: center;
         }
 
         h1 {
             margin-bottom: 20px;
-            font-family: 'Roboto', sans-serif;
         }
 
         input[type="email"],
         input[type="password"],
         input[type="text"] {
-            width: 100%;
+            width: 90%;
             padding: 10px;
             margin: 10px 0;
-            border: 1px solid #ccc;
+            border: none;
             border-radius: 5px;
-            font-size: 16px;
         }
 
         button {
-            background-color: #ff6f61;
+            background-color: #0095f6;
             border: none;
             color: white;
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-            font-size: 18px;
-            font-weight: 600;
+            transition: background 0.3s ease;
         }
 
         button:hover {
-            background-color: #ff3d31;
-            transform: translateY(-3px);
+            background-color: #007bb5;
         }
 
-        .toggle-form {
-            cursor: pointer;
+        .separator {
+            margin: 20px 0;
+            border-top: 1px solid #ffffff;
+            width: 80%;
+        }
+
+        .post-container {
             margin-top: 20px;
-            color: #ff6f61;
-            text-decoration: underline;
+            width: 100%;
+            text-align: left;
+        }
+
+        .post-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        .upload-container {
+            margin-top: 20px;
+        }
+
+        input[type="file"] {
+            margin: 10px 0;
         }
     </style>
 </head>
@@ -82,28 +97,39 @@
 
     <div class="container">
         <h1>Instant</h1>
-        <form id="registration-form">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Register</button>
-        </form>
 
-        <form id="login-form" style="display:none;">
+        <!-- Login Form -->
+        <div id="login-form">
+            <h2>Login</h2>
             <input type="email" id="login-email" placeholder="Email" required>
             <input type="password" id="login-password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
+            <button id="login-btn">Login</button>
+        </div>
 
-        <div class="toggle-form" id="toggle-form">Switch to <span id="form-toggle-text">Login</span></div>
+        <div class="separator"></div>
+
+        <!-- Registration Form -->
+        <div id="register-form">
+            <h2>Register</h2>
+            <input type="text" id="register-username" placeholder="Username" required>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Password" required>
+            <button id="register-btn">Register</button>
+        </div>
+
+        <div class="upload-container">
+            <h2>Create Post</h2>
+            <input type="file" id="post-image" accept="image/*">
+            <input type="text" id="post-caption" placeholder="Caption">
+            <button id="upload-post-btn">Upload Post</button>
+        </div>
+
+        <div class="post-container" id="post-container">
+            <!-- Posts will be dynamically loaded here -->
+        </div>
     </div>
 
-    <script type="module">
-        // Import Firebase functions
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
+    <script>
         // Your Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCLXvvMOFLkIBhaJy2B1BVsKB_4D6zQOUQ",
@@ -116,69 +142,95 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const db = getFirestore();
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // Registration form handling
-        document.getElementById('registration-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        // Register new user
+        document.getElementById('register-btn').addEventListener('click', async () => {
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
 
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // Save user data to Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    username: username,
-                    email: email
-                });
-
-                alert("Registration successful!");
-                // Redirect to user dashboard or home page here
-                window.location.href = "user_dashboard.html"; // Update with your actual user dashboard URL
-
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                alert(`User registered: ${username}`);
+                document.getElementById('register-form').reset();
             } catch (error) {
-                console.error("Error during registration:", error);
-                alert(error.message);
+                console.error("Registration error:", error);
             }
         });
 
-        // Login form handling
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // Login user
+        document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                alert("Login successful!");
-                // Redirect to user dashboard or home page here
-                window.location.href = "user_dashboard.html"; // Update with your actual user dashboard URL
-
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                alert(`Welcome back!`);
+                loadPosts(); // Load posts after login
             } catch (error) {
-                console.error("Error during login:", error);
-                alert(error.message);
+                console.error("Login error:", error);
             }
         });
 
-        // Toggle between login and registration forms
-        document.getElementById('toggle-form').addEventListener('click', () => {
-            const registrationForm = document.getElementById('registration-form');
-            const loginForm = document.getElementById('login-form');
-            const formToggleText = document.getElementById('form-toggle-text');
+        // Upload post
+        document.getElementById('upload-post-btn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('post-image');
+            const caption = document.getElementById('post-caption').value;
 
-            if (registrationForm.style.display === "none") {
-                registrationForm.style.display = "block";
-                loginForm.style.display = "none";
-                formToggleText.innerText = "Login";
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    await db.collection("posts").add({
+                        userAvatar: "default_avatar_url", // Replace with actual avatar URL
+                        username: auth.currentUser.displayName || "Anonymous",
+                        imageUrl: reader.result,
+                        caption: caption
+                    });
+                    alert("Post uploaded!");
+                    document.getElementById('upload-post-btn').reset();
+                    loadPosts(); // Reload posts
+                };
+                reader.readAsDataURL(file);
             } else {
-                registrationForm.style.display = "none";
-                loginForm.style.display = "block";
-                formToggleText.innerText = "Register";
+                alert("Please select an image to upload.");
+            }
+        });
+
+        // Load posts from Firestore
+        async function loadPosts() {
+            const postContainer = document.getElementById('post-container');
+            postContainer.innerHTML = ''; // Clear existing posts
+
+            const querySnapshot = await db.collection("posts").get();
+            querySnapshot.forEach((doc) => {
+                const postData = doc.data();
+                const postElement = document.createElement('div');
+                postElement.classList.add('post-card');
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <img src="${postData.userAvatar}" class="avatar" alt="User Avatar" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+                        <span>${postData.username}</span>
+                    </div>
+                    <img src="${postData.imageUrl}" class="post-image" alt="Post Image" style="width: 100%; height: auto;">
+                    <div class="post-footer">
+                        <p>${postData.caption}</p>
+                    </div>
+                `;
+                postContainer.appendChild(postElement);
+            });
+        }
+
+        // Monitor authentication state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loadPosts(); // Load posts if user is logged in
+            } else {
+                // If user is logged out, clear posts
+                document.getElementById('post-container').innerHTML = '';
             }
         });
     </script>
