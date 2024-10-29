@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant - User Dashboard</title>
+  
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>User Dashboard</h1>
+  <button id="logout-btn">Logout</button>
+  <div id="post-container">
+    <!-- Posts will be dynamically loaded here -->
+  </div>
+
+  <script>
+    const auth = getAuth();
+    const db = getFirestore();
+
+    // Load posts from Firestore
+    async function loadPosts() {
+      const postContainer = document.getElementById('post-container');
+      postContainer.innerHTML = ''; // Clear existing posts
+
+      const querySnapshot = await getDocs(collection(db, "posts"));
+      querySnapshot.forEach((doc) => {
+        const postData = doc.data();
+        const postElement = document.createElement('div');
+        postElement.classList.add('post-card');
+        postElement.innerHTML = `
+          <h3>${postData.username}</h3>
+          <p>${postData.caption}</p>
+          <button onclick="deletePost('${doc.id}')">Delete Post</button>
+        `;
+        postContainer.appendChild(postElement);
+      });
+    }
+
+    // Delete post function
+    async function deletePost(postId) {
+      await deleteDoc(doc(db, "posts", postId));
+      loadPosts(); // Reload posts
+    }
+
+    // Logout function
+    document.getElementById('logout-btn').addEventListener('click', async () => {
+      await auth.signOut();
+      window.location.href = 'index.html'; // Redirect to login
+    });
+
+    // Load posts on page load
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loadPosts(); // Load posts if user is logged in
+      } else {
+        window.location.href = 'index.html'; // Redirect to login if not logged in
+      }
+    });
+  </script>
+
+</body>
+</html>
